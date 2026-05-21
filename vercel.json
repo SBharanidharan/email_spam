@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.py": {
+      "runtime": "vercel-python@4.4.0",
+      "includeFiles": "model/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/static/style.css",
+      "destination": "/frontend/style.css"
+    },
+    {
+      "source": "/static/app.js",
+      "destination": "/frontend/app.js"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/index.html"
+    }
+  ]
+}

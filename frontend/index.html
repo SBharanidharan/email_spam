@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldMail AI - Email Spam Classifier</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>ShieldMail <span>AI</span></h1>
+                    <p>Machine Learning Spam Detection Dashboard</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Navigation Tabs -->
+        <nav class="app-nav">
+            <button class="nav-tab active" data-tab="playground">
+                <i class="fa-solid fa-flask"></i> Prediction Playground
+            </button>
+            <button class="nav-tab" data-tab="analytics" id="tab-analytics">
+                <i class="fa-solid fa-chart-line"></i> Analytics Dashboard
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- PLAYGROUND TAB -->
+            <section id="playground-tab" class="tab-panel active">
+                <div class="playground-grid">
+                    
+                    <!-- Left Column: Input and Templates -->
+                    <div class="input-panel card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-pen-to-square"></i> Analyze Email</h2>
+                            <p>Paste email text or choose a sample below to test classifiers</p>
+                        </div>
+                        
+                        <!-- Model Selector Cards -->
+                        <div class="model-selection-wrapper">
+                            <label class="section-label">Select Classification Model</label>
+                            <div class="model-cards-grid">
+                                <div class="model-select-card active" data-model="Ensemble Model">
+                                    <div class="model-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <h3>Ensemble Model</h3>
+                                    <span class="badge badge-purple">Best Prediction</span>
+                                </div>
+                                <div class="model-select-card" data-model="Logistic Regression">
+                                    <div class="model-card-icon"><i class="fa-solid fa-calculator"></i></div>
+                                    <h3>Logistic Reg.</h3>
+                                    <span class="badge badge-green">Balanced</span>
+                                </div>
+                                <div class="model-select-card" data-model="Naive Bayes">
+                                    <div class="model-card-icon"><i class="fa-solid fa-brain"></i></div>
+                                    <h3>Naive Bayes</h3>
+                                    <span class="badge">Baseline</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Text Input Area -->
+                        <div class="input-wrapper">
+                            <textarea id="email-input" placeholder="Type or paste the contents of your email here (minimum 3 characters)..." rows="10"></textarea>
+                            <div class="input-counter">
+                                <span id="char-count">0</span> / 10,000 characters
+                            </div>
+                            <div id="input-error" class="error-msg hidden">
+                                <i class="fa-solid fa-circle-exclamation"></i> Please enter at least 3 characters.
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button id="clear-btn" class="btn btn-secondary">
+                                <i class="fa-solid fa-eraser"></i> Clear Text
+                            </button>
+                            <button id="predict-btn" class="btn btn-primary">
+                                <span class="btn-text"><i class="fa-solid fa-magnifying-glass"></i> Classify Email</span>
+                                <span class="btn-loader hidden"><i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing...</span>
+                            </button>
+                        </div>
+
+                        <!-- Predefined Sample Templates -->
+                        <div class="templates-wrapper">
+                            <label class="section-label">Quick Test Templates</label>
+                            <div class="templates-grid">
+                                <button class="template-card spam" data-type="spam-phishing">
+                                    <div class="template-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="template-text">
+                                        <h4>Phishing Alert</h4>
+                                        <p>Urgent bank security reset</p>
+                                    </div>
+                                </button>
+                                <button class="template-card spam" data-type="spam-promo">
+                                    <div class="template-icon"><i class="fa-solid fa-gift"></i></div>
+                                    <div class="template-text">
+                                        <h4>Promo Lottery</h4>
+                                        <p>Claim $1,000 gift card</p>
+                                    </div>
+                                </button>
+                                <button class="template-card ham" data-type="ham-meeting">
+                                    <div class="template-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                                    <div class="template-text">
+                                        <h4>Team Meeting</h4>
+                                        <p>Weekly project updates</p>
+                                    </div>
+                                </button>
+                                <button class="template-card ham" data-type="ham-personal">
+                                    <div class="template-icon"><i class="fa-solid fa-comments"></i></div>
+                                    <div class="template-text">
+                                        <h4>Coffee Sync</h4>
+                                        <p>Catching up this Friday</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Prediction Results -->
+                    <div class="result-panel card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-chart-pie"></i> Classification Result</h2>
+                            <p>Real-time machine learning prediction output</p>
+                        </div>
+                        
+                        <div class="result-content-wrapper">
+                            <!-- Empty State -->
+                            <div id="result-empty" class="result-empty-state">
+                                <div class="empty-icon">
+                                    <i class="fa-solid fa-envelope-open-text"></i>
+                                </div>
+                                <h3>Awaiting Input</h3>
+                                <p>Type an email and click "Classify Email" to run the machine learning model and view the prediction details.</p>
+                            </div>
+
+                            <!-- Loading State -->
+                            <div id="result-loading" class="result-loading-state hidden">
+                                <div class="scan-animation">
+                                    <div class="scan-bar"></div>
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <h3>Scanning Email content</h3>
+                                <p>Running cleaning, tokenization, lemmatization, and calculating TF-IDF feature frequencies...</p>
+                            </div>
+
+                            <!-- Success Result State -->
+                            <div id="result-success" class="result-success-state hidden">
+                                <div id="verdict-banner" class="verdict-banner">
+                                    <div class="verdict-icon" id="verdict-icon-box">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </div>
+                                    <div class="verdict-title">
+                                        <h3 id="prediction-label">NOT SPAM</h3>
+                                        <p>Target Class: <span id="target-class-num">0</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="probability-details">
+                                    <div class="gauge-container">
+                                        <svg class="gauge-svg" viewBox="0 0 100 50">
+                                            <path class="gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-width="8"></path>
+                                            <path class="gauge-fill" id="gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-width="8" stroke-dasharray="125.6" stroke-dashoffset="125.6"></path>
+                                            <text class="gauge-text" x="50" y="45" id="gauge-value">0%</text>
+                                        </svg>
+                                        <span class="gauge-label">Spam Probability</span>
+                                    </div>
+
+                                    <div class="metrics-grid-mini">
+                                        <div class="metric-mini-card">
+                                            <span class="mini-label">Model Confidence</span>
+                                            <span class="mini-val" id="model-confidence-val">99.8%</span>
+                                        </div>
+                                        <div class="metric-mini-card">
+                                            <span class="mini-label">Classifier Used</span>
+                                            <span class="mini-val" id="model-used-val">Support Vector Machine</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="nlp-logs-card">
+                                    <h4><i class="fa-solid fa-code"></i> NLP Preprocessing Log</h4>
+                                    <div class="log-item">
+                                        <span class="log-label">Original Characters:</span>
+                                        <span class="log-value" id="log-orig-chars">154</span>
+                                    </div>
+                                    <div class="log-item">
+                                        <span class="log-label">Preprocessed Text:</span>
+                                        <div class="log-text-block" id="log-processed-text"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ANALYTICS TAB -->
+            <section id="analytics-tab" class="tab-panel">
+                <!-- Overview Row -->
+                <div class="metrics-summary-grid">
+                    <div class="metrics-summary-card hover-glow border-purple">
+                        <div class="card-icon bg-purple-soft"><i class="fa-solid fa-star"></i></div>
+                        <div class="card-info">
+                            <h3>Best Classifier</h3>
+                            <p id="best-model-name">Ensemble Model</p>
+                            <span class="card-sub" id="best-model-acc">98.96% Accuracy</span>
+                        </div>
+                    </div>
+                    <div class="metrics-summary-card hover-glow border-blue">
+                        <div class="card-icon bg-blue-soft"><i class="fa-solid fa-bullseye"></i></div>
+                        <div class="card-info">
+                            <h3>Precision Leader</h3>
+                            <p id="precision-model-name">Ensemble Model</p>
+                            <span class="card-sub" id="best-model-prec">100.0% Precision</span>
+                        </div>
+                    </div>
+                    <div class="metrics-summary-card hover-glow border-green">
+                        <div class="card-icon bg-green-soft"><i class="fa-solid fa-rotate-left"></i></div>
+                        <div class="card-info">
+                            <h3>Highest Recall</h3>
+                            <p id="recall-model-name">Ensemble Model</p>
+                            <span class="card-sub" id="best-model-rec">92.94% Recall</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphs Grid -->
+                <div class="analytics-charts-grid">
+                    <!-- Chart Card -->
+                    <div class="chart-container-card card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-chart-column"></i> Performance Metrics Comparison</h2>
+                            <p>Comparing classifiers across standard evaluation criteria</p>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="comparisonChart" height="250"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Description Card -->
+                    <div class="metrics-explanation-card card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-circle-info"></i> Evaluation Metrics Guide</h2>
+                            <p>What do these Machine Learning scores mean?</p>
+                        </div>
+                        <div class="explanation-body">
+                            <div class="metric-expl-item">
+                                <strong>Accuracy:</strong> Overall correct predictions / total predictions. Excellent baseline, but can be misleading for imbalanced datasets.
+                            </div>
+                            <div class="metric-expl-item">
+                                <strong>Precision:</strong> True Spams / (True Spams + False Spams). Out of all emails classified as Spam, how many were actually Spam? <em>Critical to avoid blocking important emails!</em>
+                            </div>
+                            <div class="metric-expl-item">
+                                <strong>Recall:</strong> True Spams / (True Spams + Missed Spams). Out of all actual Spam emails, how many did the model block?
+                            </div>
+                            <div class="metric-expl-item">
+                                <strong>F1-Score:</strong> Harmonic mean of Precision and Recall. Balances both metrics into a single representative score.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confusion Matrices Row -->
+                <div class="confusion-matrices-card card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-table-cells"></i> Model Confusion Matrices</h2>
+                        <p>Detailed true vs predicted classification counts on test set (575 total samples)</p>
+                    </div>
+                    
+                    <div class="cm-grids-container">
+                        <!-- Naive Bayes CM -->
+                        <div class="cm-block">
+                            <h3>Naive Bayes</h3>
+                            <div class="cm-matrix">
+                                <div class="cm-cell tn" title="True Negative (Correct Ham)">
+                                    <span class="cm-label">True Ham</span>
+                                    <span class="cm-count" id="cm-nb-tn">483</span>
+                                </div>
+                                <div class="cm-cell fp" title="False Positive (Ham blocked as Spam)">
+                                    <span class="cm-label">False Spam</span>
+                                    <span class="cm-count" id="cm-nb-fp">7</span>
+                                </div>
+                                <div class="cm-cell fn" title="False Negative (Spam missed)">
+                                    <span class="cm-label">Missed Spam</span>
+                                    <span class="cm-count" id="cm-nb-fn">19</span>
+                                </div>
+                                <div class="cm-cell tp" title="True Positive (Spam blocked)">
+                                    <span class="cm-label">True Spam</span>
+                                    <span class="cm-count" id="cm-nb-tp">66</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logistic Regression CM -->
+                        <div class="cm-block">
+                            <h3>Logistic Regression</h3>
+                            <div class="cm-matrix">
+                                <div class="cm-cell tn" title="True Negative (Correct Ham)">
+                                    <span class="cm-label">True Ham</span>
+                                    <span class="cm-count" id="cm-lr-tn">490</span>
+                                </div>
+                                <div class="cm-cell fp" title="False Positive (Ham blocked as Spam)">
+                                    <span class="cm-label">False Spam</span>
+                                    <span class="cm-count" id="cm-lr-fp">0</span>
+                                </div>
+                                <div class="cm-cell fn" title="False Negative (Spam missed)">
+                                    <span class="cm-label">Missed Spam</span>
+                                    <span class="cm-count" id="cm-lr-fn">22</span>
+                                </div>
+                                <div class="cm-cell tp" title="True Positive (Spam blocked)">
+                                    <span class="cm-label">True Spam</span>
+                                    <span class="cm-count" id="cm-lr-tp">63</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Ensemble Model CM -->
+                        <div class="cm-block">
+                            <h3>Ensemble Model</h3>
+                            <div class="cm-matrix">
+                                <div class="cm-cell tn" title="True Negative (Correct Ham)">
+                                    <span class="cm-label">True Ham</span>
+                                    <span class="cm-count" id="cm-ens-tn">490</span>
+                                </div>
+                                <div class="cm-cell fp" title="False Positive (Ham blocked as Spam)">
+                                    <span class="cm-label">False Spam</span>
+                                    <span class="cm-count" id="cm-ens-fp">0</span>
+                                </div>
+                                <div class="cm-cell fn" title="False Negative (Spam missed)">
+                                    <span class="cm-label">Missed Spam</span>
+                                    <span class="cm-count" id="cm-ens-fn">9</span>
+                                </div>
+                                <div class="cm-cell tp" title="True Positive (Spam blocked)">
+                                    <span class="cm-label">True Spam</span>
+                                    <span class="cm-count" id="cm-ens-tp">76</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>ShieldMail AI © 2026. Made with FastAPI, Scikit-Learn, and Vanilla HTML/CSS/JS.</p>
+            <p class="footer-links">
+                <span><i class="fa-solid fa-server"></i> API: <a href="/docs" target="_blank">Swagger Docs</a></span>
+                <span>•</span>
+                <span><i class="fa-solid fa-microchip"></i> ML: 0.9896 Ensemble Accuracy</span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
